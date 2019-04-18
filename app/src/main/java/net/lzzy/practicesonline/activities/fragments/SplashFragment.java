@@ -13,19 +13,19 @@ import java.util.Calendar;
  * Description:
  */
 public class SplashFragment extends BaseFragment {
-    private int[] imgs = new int[]{R.drawable.splash1, R.drawable.splash2, R.drawable.splash3};
     private OnSplashFinishedListener listener;
+    private int[] imgs = new int[]{R.drawable.splash1, R.drawable.splash2, R.drawable.splash3};
 
     @Override
     protected void populate() {
         View wall = find(R.id.fragment_splash_wall);
-        int pos = Calendar.getInstance().get(Calendar.SECOND)%3;
+        int pos = Calendar.getInstance().get(Calendar.SECOND) % 3;
         wall.setBackgroundResource(imgs[pos]);
         wall.setOnClickListener(v -> listener.cancelCount());
     }
 
     @Override
-    public int getLayoutRes() {
+    protected int getLayoutRes() {
         return R.layout.fragment_splash;
     }
 
@@ -37,11 +37,17 @@ public class SplashFragment extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnSplashFinishedListener) {
+        try {
             listener = (OnSplashFinishedListener) context;
-        } else {
+        } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + "必须实现OnSplashFinishedListener");
         }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
     }
 
     public interface OnSplashFinishedListener {

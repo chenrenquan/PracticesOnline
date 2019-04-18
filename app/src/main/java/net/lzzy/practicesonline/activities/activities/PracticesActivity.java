@@ -10,8 +10,9 @@ import net.lzzy.practicesonline.activities.fragments.PracticesFragment;
  * Description:
  */
 public class PracticesActivity extends BaseActivity {
+
     @Override
-    protected int getLayoutRes() {
+    protected int getLayoutRse() {
         return R.layout.activity_practices;
     }
 
@@ -22,6 +23,6 @@ public class PracticesActivity extends BaseActivity {
 
     @Override
     protected Fragment createFragment() {
-        return new  PracticesFragment();
+        return new PracticesFragment();
     }
 }

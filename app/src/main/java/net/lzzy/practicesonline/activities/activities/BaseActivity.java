@@ -1,6 +1,5 @@
 package net.lzzy.practicesonline.activities.activities;
 
-
 import android.os.Bundle;
 import android.view.Window;
 
@@ -13,15 +12,16 @@ import net.lzzy.practicesonline.activities.utils.AppUtils;
 
 /**
  * @author lzzy_Colo
- * @date 2019/4/12
+ * @date 2019/4/11
  * Description:
  */
 public abstract class BaseActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(getLayoutRes());
+        setContentView(getLayoutRse());
         AppUtils.addActivity(this);
         FragmentManager manager = getSupportFragmentManager();
         Fragment fragment = manager.findFragmentById(getContainerId());
@@ -31,18 +31,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected abstract int getLayoutRes();
-
-    protected abstract int getContainerId();
-
-    protected abstract Fragment createFragment();
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        AppUtils.removeActivity(this);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -50,9 +38,36 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        AppUtils.setStopped(getLocalClassName());
+    protected void onStop() {
+        super.onStop();
+        AppUtils.setStoppped(getLocalClassName());
     }
-}
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        AppUtils.removeActivity(this);
+    }
+
+    /**
+     * 托管activity的布局
+     *
+     * @return activity的布局
+     */
+    protected abstract int getLayoutRse();
+
+    /**
+     * fragment容器的ID
+     *
+     * @return 容器的ID
+     */
+    protected abstract int getContainerId();
+
+    /**
+     * 生成Fragment对象
+     *
+     * @return Fragment对象
+     */
+    protected abstract Fragment createFragment();
+
+}

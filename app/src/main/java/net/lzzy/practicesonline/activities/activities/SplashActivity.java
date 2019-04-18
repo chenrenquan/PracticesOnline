@@ -1,55 +1,81 @@
 package net.lzzy.practicesonline.activities.activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import net.lzzy.practicesonline.R;
+import net.lzzy.practicesonline.activities.constants.ApiConstants;
 import net.lzzy.practicesonline.activities.fragments.SplashFragment;
 import net.lzzy.practicesonline.activities.utils.AbstractStaticHandler;
 import net.lzzy.practicesonline.activities.utils.AppUtils;
+import net.lzzy.practicesonline.activities.utils.ViewUtils;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * @author lzzy_Colo
- * @date 2019/4/10
- * Description:
+ * @author Administrator
  */
 public class SplashActivity extends BaseActivity implements SplashFragment.OnSplashFinishedListener {
-    private SplashHandler handler = new SplashHandler(this);
-    private int seconds = 10;
-    private TextView tvDisplay;
-    private TextView tvCount;
+
     public static final int WHAT_COUNTING = 0;
     public static final int WHAT_EXCEPTION = 1;
-    public static final int WHAT_COUNT_DONT = 2;
+    public static final int WHAT_COUNT_DONE = 2;
     public static final int WHAT_SERVER_OFF = 3;
+    private TextView tvDisplay;
+    private int seconds = 10;
     private boolean isServerOn = true;
 
-    private static class SplashHandler extends AbstractStaticHandler<SplashActivity> {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (!AppUtils.isNetworkAvailable()) {
+            new AlertDialog.Builder(this)
+                    .setMessage("网络不可用，是否继续")
+                    .setPositiveButton("退出", (dialog, which) -> AppUtils.exit())
+                    .setPositiveButton("确定", (dialog, which) -> gotoMain()).show();
+        } else {
+            ThreadPoolExecutor executor = AppUtils.getExectuor();
+            executor.execute(this::CountDown);
+            executor.execute(this::detectServerStatus);
+        }
+        tvDisplay = findViewById(R.id.activity_splash_tv_count_down);
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
+    }
 
-        protected SplashHandler(SplashActivity context) {
+    private CountHandler handler = new CountHandler(this);
+
+    private class CountHandler extends AbstractStaticHandler<SplashActivity> {
+        CountHandler(SplashActivity context) {
             super(context);
         }
 
-
+        /**
+         * @param msg
+         * @param activity
+         */
         @Override
         public void handleMessage(Message msg, SplashActivity activity) {
             switch (msg.what) {
+                //倒计时提示
                 case WHAT_COUNTING:
                     String text = msg.obj.toString() + "秒";
                     activity.tvDisplay.setText(text);
                     break;
-                case WHAT_COUNT_DONT:
+                case WHAT_COUNT_DONE:
                     if (activity.isServerOn) {
                         activity.gotoMain();
                     }
@@ -60,6 +86,7 @@ public class SplashActivity extends BaseActivity implements SplashFragment.OnSpl
                             .setPositiveButton("继续", (dialog, which) -> activity.gotoMain())
                             .setNegativeButton("退出", (dialog, which) -> AppUtils.exit()).show();
                     break;
+                //服务器探测提示
                 case WHAT_SERVER_OFF:
                     Activity context = AppUtils.getRunningActivity();
                     new AlertDialog.Builder(Objects.requireNonNull(context))
@@ -70,67 +97,42 @@ public class SplashActivity extends BaseActivity implements SplashFragment.OnSpl
                                 }
                             })
                             .setNegativeButton("退出", (dialog, which) -> AppUtils.exit())
-                            .setNeutralButton("设置", (dialog, which) -> {
-                            }).show();
+                            .setNeutralButton("设置", (dialog, which) -> ViewUtils.gotoSetting(context))
+                            .show();
                     break;
                 default:
                     break;
-
             }
         }
-
-        @Override
-        public void sendMessag(Object o) {
-
-        }
     }
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        tvCount = findViewById(R.id.activity_splash_tv_count_down);
-        if (!AppUtils.isNetworkAvailable()) {
-            new AlertDialog.Builder(this)
-                    .setMessage("网络不可用是否继续")
-                    .setPositiveButton("退出", (dialog, which) -> AppUtils.exit())
-                    .setPositiveButton("确定", (dialog, which) -> gotoMain())
-                    .show();
-        } else {
-            ThreadPoolExecutor executor = AppUtils.getExectuor();
-            executor.execute(this::countDown);
-            executor.execute(this::detectServerStatus);
-
-        }
-
-    }
-
-
-    private void countDown() {
+    private void CountDown() {
         while (seconds >= 0) {
-            handler.sendMessag(handler.obtainMessage(WHAT_COUNTING, seconds));
+            Message message = handler.obtainMessage(WHAT_COUNTING);
+            message.obj = seconds;
+            handler.sendMessage(message);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                handler.sendMessag(handler.obtainMessage(WHAT_EXCEPTION, e.getMessage()));
-
+                handler.sendMessage(handler.obtainMessage(WHAT_EXCEPTION, e.getMessage()));
             }
             seconds--;
         }
-        handler.sendEmptyMessage(WHAT_COUNT_DONT);
+        handler.sendEmptyMessage(WHAT_COUNT_DONE);
     }
 
     private void detectServerStatus() {
         try {
-            AppUtils.tryConnectServer("http://10.88.91.102:8888");
+            AppUtils.tryConnectServer(ApiConstants.URL_API);
         } catch (IOException e) {
             isServerOn = false;
-            handler.sendMessag(handler.obtainMessage(WHAT_SERVER_OFF, e.getMessage()));
+            handler.sendMessage(handler.obtainMessage(WHAT_SERVER_OFF, e.getMessage()));
         }
     }
 
     public void gotoMain() {
-
+        startActivity(new Intent(this, PracticesActivity.class));
+        finish();
     }
 
     @Override
@@ -140,7 +142,7 @@ public class SplashActivity extends BaseActivity implements SplashFragment.OnSpl
     }
 
     @Override
-    protected int getLayoutRes() {
+    protected int getLayoutRse() {
         return R.layout.activity_splash;
     }
 
@@ -153,14 +155,5 @@ public class SplashActivity extends BaseActivity implements SplashFragment.OnSpl
     protected Fragment createFragment() {
         return new SplashFragment();
     }
-
-   /* @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        new AlertDialog.Builder(this)
-                .setMessage("要退出吗")
-                .setPositiveButton("确定", ((dialog, which) -> AppUtils.exit())).show();
-    }*/
-
 
 }

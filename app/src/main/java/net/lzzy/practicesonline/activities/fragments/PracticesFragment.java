@@ -1,5 +1,7 @@
 package net.lzzy.practicesonline.activities.fragments;
 
+import net.lzzy.practicesonline.R;
+
 /**
  * @author lzzy_Colo
  * @date 2019/4/16
@@ -7,13 +9,11 @@ package net.lzzy.practicesonline.activities.fragments;
  */
 public class PracticesFragment extends BaseFragment {
     @Override
-    protected void populate() {
-
-    }
+    protected void populate() {}
 
     @Override
-    public int getLayoutRes() {
-        return 0;
+    protected int getLayoutRes() {
+        return R.layout.fragment_practices;
     }
 
     @Override

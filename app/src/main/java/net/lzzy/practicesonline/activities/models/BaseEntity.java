@@ -5,15 +5,15 @@ import net.lzzy.sqllib.AsPrimaryKey;
 import java.util.UUID;
 
 /**
- *
- * @author lzzy_gxy
+ * @author lzzy_Colo
  * @date 2019/3/11
  * Description:
  */
 public class BaseEntity {
     @AsPrimaryKey
     UUID id;
-    BaseEntity(){
+
+    BaseEntity() {
         id = UUID.randomUUID();
     }
 
