@@ -37,7 +37,7 @@ public class PracticeFactory {
     public List<Practice> search(String kw) {
         try {
             return repository.getByKeyword(kw,
-                    new String[]{Practice.COL_NAME, Practice.COL_outlines}, false);
+                    new String[]{Practice.COL_NAME, Practice.COL_OUTLINES}, false);
         } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -45,16 +45,16 @@ public class PracticeFactory {
     }
 
     public boolean add(Practice practice) {
-        if (isPracticeInDb(practice)) {
-            return false;
+        if (!isPracticeInDb(practice)) {
+            repository.insert(practice);
+            return true;
         }
-        repository.insert(practice);
-        return true;
+        return false;
     }
 
     private boolean isPracticeInDb(Practice practice) {
         try {
-            return repository.getByKeyword(String.valueOf(practice.getApild()),
+            return repository.getByKeyword(String.valueOf(practice.getApiId()),
                     new String[]{Practice.COL_API_ID}, true).size() > 0;
         } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();

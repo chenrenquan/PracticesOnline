@@ -12,6 +12,7 @@ import java.lang.ref.WeakReference;
  */
 public abstract class AbstractStaticHandler<T> extends Handler {
     private final WeakReference<T> context;
+
     public AbstractStaticHandler(T context) {
         this.context = new WeakReference<>(context);
     }

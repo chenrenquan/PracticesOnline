@@ -1,28 +1,32 @@
 package net.lzzy.practicesonline.activities.models;
 
+import net.lzzy.practicesonline.activities.constants.ApiConstants;
 import net.lzzy.sqllib.Ignored;
+import net.lzzy.sqllib.Jsonable;
 import net.lzzy.sqllib.Sqlitable;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 
 /**
- * @author lzzy_Colo
- * @date 2019/4/16
+ * @author lzzy_Colo on date 2019/4/16
  * Description:
  */
-public class Practice extends BaseEntity implements Sqlitable {
+public class Practice extends BaseEntity implements Sqlitable, Jsonable {
     @Ignored
     static final String COL_NAME = "name";
     @Ignored
-    static final String COL_outlines = "outlines";
+    static final String COL_OUTLINES = "outlines";
     @Ignored
-    static final String COL_API_ID = "apild";
+    static final String COL_API_ID = "apiId";
     private String name;
     private int questionCount;
     private Date downloadDate;
     private String outlines;
     private boolean isDownloaded;
-    private int apild;
+    private int apiId;
 
     public String getName() {
         return name;
@@ -64,17 +68,31 @@ public class Practice extends BaseEntity implements Sqlitable {
         isDownloaded = downloaded;
     }
 
-    public int getApild() {
-        return apild;
+    public int getApiId() {
+        return apiId;
     }
 
-    public void setApild(int apild) {
-        this.apild = apild;
+    public void setApiId(int apiId) {
+        this.apiId = apiId;
     }
 
 
     @Override
     public boolean needUpdate() {
         return false;
+    }
+
+    @Override
+    public JSONObject toJson() throws JSONException {
+        return null;
+    }
+
+    @Override
+    public void fromJson(JSONObject json) throws JSONException {
+        apiId = json.getInt(ApiConstants.JSON_PRACTICE_API_ID);
+        name = json.getString(ApiConstants.JSON_PRACTICE_NAME);
+        outlines = json.getString(ApiConstants.JSON_PRACTICE_OUTLINES);
+        questionCount = json.getInt(ApiConstants.JSON_PRACTICE_QUESTION_COUNT);
+        downloadDate = new Date();
     }
 }
